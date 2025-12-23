@@ -4,31 +4,46 @@ const verificationDiv = document.getElementById('verification');
 loginForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
-
   if(!username) {
     verificationDiv.textContent = "Please enter your username.";
     return;
   }
 
   // Generate a random verification code
-  const code = 'FW-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+  const code = 'FW-' + Math.random().toString(36).substring(2,10).toUpperCase();
 
-  // For now, just display the code
+  // Display instructions
   verificationDiv.innerHTML = `
-    <p>Hi ${username}, your verification code is:</p>
+    <p>Hi ${username}, post this code on your Fandom message wall:</p>
     <strong>${code}</strong>
-    <p>Post this code on your Fandom message wall, then click "Verify".</p>
+    <p>Then click "Verify".</p>
     <button id="verifyBtn">Verify</button>
   `;
 
-  // Store username + code in localStorage for now
+  // Save username & code in localStorage temporarily
   localStorage.setItem('fw_username', username);
   localStorage.setItem('fw_code', code);
 
-  // Handle verify click
-  document.getElementById('verifyBtn').addEventListener('click', () => {
-    alert("Verification will check Fandom wall (to be implemented).");
-    // Later: call backend to check wall for code
-    // If valid: redirect to index.html
+  // Handle verify button click
+  document.getElementById('verifyBtn').addEventListener('click', async () => {
+    verificationDiv.textContent = "Checking Fandom wall...";
+
+    try {
+      const res = await fetch('/.netlify/functions/verify-wall', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, code })
+      });
+      const data = await res.json();
+      if(data.verified) {
+        localStorage.setItem('fw_verified', 'true');
+        window.location.href = "index.html";
+      } else {
+        verificationDiv.textContent = "Code not found on wall. Make sure it is posted and try again.";
+      }
+    } catch(e) {
+      verificationDiv.textContent = "Error checking wall. Try again later.";
+      console.error(e);
+    }
   });
 });
