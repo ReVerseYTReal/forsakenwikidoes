@@ -16,12 +16,17 @@ loginForm.addEventListener('submit', (e) => {
   const code = 'FW-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
   // Display instructions to user
-  verificationDiv.innerHTML = `
-    <p>Hi <strong>${username}</strong>, post this code on your Fandom message wall:</p>
-    <strong>${code}</strong>
-    <p>Once posted, click "Verify" below:</p>
-    <button id="verifyBtn">Verify</button>
-  `;
+verificationDiv.innerHTML = `
+  <p>Hi <strong>${username}</strong>, post this code on your Fandom message wall:</p>
+  <strong>${code}</strong>
+  <p>Once posted, click "Verify" below:</p>
+`;
+
+const verifyBtn = document.createElement('button');
+verifyBtn.textContent = "Verify";
+verifyBtn.id = "verifyBtn";
+verificationDiv.appendChild(verifyBtn);
+
 
   // Save username and code temporarily in localStorage
   localStorage.setItem('fw_username', username);
